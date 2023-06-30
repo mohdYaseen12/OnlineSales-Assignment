@@ -1,0 +1,85 @@
+1.   
+
+SELECT d.NAME AS DEPT_NAME, AVG(e.AMT) AS AVG_MONTHLY_SALARY
+FROM DEPARTMENT d
+JOIN EMPLOYEE e ON d.ID = e.DEPT_ID
+GROUP BY d.NAME
+ORDER BY AVG_MONTHLY_SALARY DESC
+LIMIT 3;
+
+2.
+
+import csv
+
+# Read department data from CSV
+with open('departments.csv', 'r') as file:
+    departments_data = list(csv.reader(file))
+
+# Read employee data from CSV
+with open('employees.csv', 'r') as file:
+    employees_data = list(csv.reader(file))
+
+# Read salary data from CSV
+with open('salaries.csv', 'r') as file:
+    salaries_data = list(csv.reader(file))
+
+# Calculate average monthly salary per department
+department_salaries = {}
+for employee in employees_data[1:]:
+    dept_id = int(employee[2])
+    emp_id = int(employee[0])
+    monthly_salaries = [int(salary[2]) for salary in salaries_data if int(salary[0]) == emp_id]
+    average_salary = sum(monthly_salaries) / len(monthly_salaries)
+    if dept_id in department_salaries:
+        department_salaries[dept_id].append(average_salary)
+    else:
+        department_salaries[dept_id] = [average_salary]
+
+# Calculate overall average monthly salary per department
+department_avg_salaries = {}
+for dept in department_salaries:
+    department_avg_salaries[dept] = sum(department_salaries[dept]) / len(department_salaries[dept])
+
+# Get top 3 departments with highest average salary
+top_departments = sorted(department_avg_salaries.items(), key=lambda x: x[1], reverse=True)[:3]
+
+# Print the report
+print("DEPT_NAME    AVG_MONTHLY_SALARY (USD)")
+for dept_id, avg_salary in top_departments:
+    dept_name = [dept[1] for dept in departments_data if int(dept[0]) == dept_id][0]
+    print(f"{dept_name}    {avg_salary:.2f}")
+
+
+3.
+
+def compute(n):
+    if n < 10:
+        out = n ** 2
+    elif n < 20:
+        out = 1
+        for i in range(1, n-9):  # Fixed: Changed n-10 to n-9
+            out *= i
+    else:
+        lim = n - 20
+        out = 0  # Fixed: Changed lim * lim to 0
+        for i in range(1, lim+1):  # Fixed: Added +1 to lim
+            out += i
+    print(out)
+
+
+
+4. 
+
+cat > output.tsv >> EOF
+cat input.tsv | awk '{print $1}' 
+lineNum ="$grep -n "Xerox" input.tsv"
+awk -v d="$lineNum" -F"," 'BEGIN { OFS = "," } {$6=d; print}' input.csv > output.csv
+EOF
+cat output.tsv | tee >(wc -l) | tee >(sha1sum) | tail -5
+
+
+
+
+5.
+# here $4 signifies that owner details in column 4
+ls -l -R /path/to/dir | grep ^- | awk '{print $4}'
